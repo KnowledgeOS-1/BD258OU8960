@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, redirect, url_for, request
 import os
 
 app = Flask(__name__)
@@ -6,6 +6,10 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
+
+@app.route('/order')
+def order():
+    return send_from_directory('.', 'order.html')
 
 @app.route('/<path:path>')
 def static_files(path):
