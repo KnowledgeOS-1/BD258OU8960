@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FedEx Delivery Status with Timeline</title>
+<style>
+  body {
+    margin: 0;
+    background-color: #f1f8fb;
+    font-family: Arial, sans-serif;
+    color: #444;
+  }
+  .header {
+    background-color: #3b1983;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .header .fedex {
+    font-weight: bold;
+    font-size: 24px;
+    color: white;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+  .header .fedex .fed {
+    color: white;
+  }
+  .header .fedex .ex {
+    color: #fb6600; /* Slightly brighter orange */
+  }
+  .content {
+    margin: 30px 0 15px 0;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: #333; /* Slightly darker for clarity */
+  }
+  .progress-container {
+    margin: 15px 0 10px 0;
+    text-align: center;
+  }
+  .progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #008000; /* green */
+  }
+  .line {
+    width: 30px;
+    height: 2px;
+    background-color: #008000;
+  }
+  .check {
+    width: 18px;
+    height: 18px;
+    background-color: #008000;
+    border-radius: 50%;
+    position: relative;
+  }
+  .check::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 3px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+  }
+  .proof {
+    color: #0072b2;
+    font-weight: 600;
+    font-size: 11px;
+    margin-top: 8px;
+    letter-spacing: 0.7px;
+  }
+  .info-table {
+    margin: 0 auto 50px auto;
+    max-width: 280px;
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .info-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 6px 0;
+  }
+  .label {
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #222;
+    min-width: 130px;
+    text-align: right;
+    letter-spacing: 0.6px;
+  }
+  .value {
+    font-weight: 300;
+    color: #555;
+    text-align: left;
+    min-width: 130px;
+  }
+  /* For multiline values in SPECIAL HANDLING */
+  .value.multiline {
+    line-height: 1.15;
+  }
+
+  /* Timeline Styles - Added from second file */
+  .timeline-container {
+    display: flex;
+    gap: 15px;
+    max-width: 600px;
+    margin: 0 auto;
+    align-items: flex-start;
+  }
+  .timeline-line {
+    position: relative;
+    width: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .line-bg {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 100%;
+    background: #ddd;
+    border-radius: 4px;
+    z-index: 0;
+  }
+  .line-progress {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    background-color: #6a1b9a;
+    border-radius: 4px;
+    z-index: 1;
+  }
+  .dot-timeline {
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border: 2px solid #6a1b9a;
+    border-radius: 50%;
+    margin: 20px 0;
+    position: relative;
+    z-index: 2;
+  }
+  .dot-timeline.completed {
+    background: #6a1b9a;
+  }
+  .big-circle {
+    width: 55px;
+    height: 55px;
+    background: #6a1b9a;
+    border-radius: 50%;
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    box-shadow: none;
+  }
+  .big-circle svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: white;
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .timeline-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .event {
+    position: relative;
+    padding-left: 20px;
+    max-width: 500px;
+  }
+  .event.active-background {
+    background-color: #f7f6fa;
+    border-radius: 20px 30px 30px 20px;
+    padding: 18px 22px;
+    margin-left: -8px;
+    box-sizing: border-box;
+    flex-grow: 1;
+  }
+  .event-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 14px;
+    color: #2f2f32;
+    margin-bottom: 4px;
+  }
+  .event-subtitle {
+    font-style: italic;
+    color: #9b9b9b;
+    font-size: 13px;
+    margin-bottom: 3px;
+  }
+  .event-desc {
+    font-weight: 400;
+    font-size: 14px;
+    color: #606060;
+  }
+  .event.to-small {
+    color: #a9a9a9;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 14px;
+    padding-left: 20px;
+  }
+  .event.to-subtitle,
+  .event.to-desc {
+    font-style: italic;
+    font-size: 13px;
+    color: #c0c0c0;
+    padding-left: 20px;
+    margin-top: 0;
+  }
+  .view-history {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #237f9c;
+    font-weight: 400;
+    font-size: 14px;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 10px;
+    padding-left: 10px;
+  }
+  .view-history svg {
+    width: 18px;
+    height: 18px;
+    stroke: #237f9c;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+  }
+  .update-section {
+    max-width: 600px;
+    margin: 20px auto 0 auto;
+    font-size: 15px;
+    color: #333;
+    line-height: 1.4;
+    text-align: center;
+    padding: 20px;
+  }
+  @media (max-width: 480px) {
+    .timeline-container {
+      max-width: 100%;
+      padding: 0 10px;
+    }
+    .timeline-content {
+      gap: 25px;
+    }
+    .event.active-background {
+      padding: 15px 16px;
+      margin-left: -4px;
+    }
+    .big-circle {
+      width: 35px;
+      height: 35px;
+    }
+    .big-circle svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="header" role="banner" aria-label="FedEx logo">
+    <div class="fedex" aria-hidden="true">
+      <span class="fed">Fed</span><span class="ex">Ex</span><sup style="color:#fb6600;">®</sup>
+    </div>
+  </div>
+  <div class="content" role="main" aria-live="polite">
+    Hi. Your package was delivered Mon, 04/08/2024<br />at 1:26pm.
+  </div>
+  <div class="progress-container">
+    <div class="progress" aria-label="Delivery progress indicators" role="img">
+      <div class="dot"></div>
+      <div class="line"></div>
+      <div class="dot"></div>
+      <div class="line"></div>
+      <div class="dot"></div>
+      <div class="line"></div>
+      <div class="check"></div>
+    </div>
+    <div class="proof" aria-label="Link to obtain proof of delivery">OBTAIN PROOF OF DELIVERY</div>
+  </div>
+  <div class="info-table" aria-label="Package delivery details">
+    <div class="info-row"><span class="label">TRACKING NUMBER</span><span class="value">272766521948</span></div>
+    <div class="info-row"><span class="label">Sent date:</span><span class="value">Thursday 4/12/2025</span></div>
+    <div class="info-row"><span class="label">Delivery date:</span><span class="value"> Saturday 6/12/2025</span></div>
+    <div class="info-row"><span class="label">Name or receiver:</span><span class="value">Tammy Rambo </span></div>
+    <div class="info-row"><span class="label">Sender name:</span><span class="value">Montana Rollins</span></div>
+    <div class="info-row"><span class="label">Name of package:</span><span class="value">Portfolio</span></div>
+    <div class="info-row"><span class="label">Receiver phone number:</span><span class="value">+1-330-383-1037</span></div>
+    <div class="info-row"><span class="label">Sender phone number:</span><span class="value"> +1 (810) 285-5016</span></div>
+    <div class="info-row">
+      <span class="label">Reciver email:</span>
+      <span class="value multiline">
+        tammyrambo0725@gmail.com
+      </span>
+    </div>
+    <div class="info-row"><span class="label">Reviver house address:</span><span class="value">331 West Salem Street Apt 202</span></div>
+    <div class="info-row"><span class="label">Sender house address:</span><span class="value">Hamilton</span></div>
+    <div class="info-row"><span class="label">Amount of package:</span><span class="value">$1,200</span></div>
+  </div>
+
+  <!-- Timeline Section from second file -->
+  <div class="timeline-container" role="list">
+    <div class="timeline-line" aria-hidden="true">
+      <div class="line-bg"></div>
+      <div class="line-progress"></div>
+      <div class="dot-timeline completed"></div>
+      <div class="dot-timeline completed"></div>
+      <div class="dot-timeline completed"></div>
+      <div class="big-circle" aria-current="true" aria-label="Current Stage: Out for Delivery">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </div>
+      <div class="dot-timeline"></div>
+    </div>
+
+    <div class="timeline-content">
+      <div class="event" role="listitem">
+        <div class="event-title" style="font-weight:700;">FROM</div>
+        <div class="event-subtitle">Hamilton</div>
+        <div class="event-desc">04/12/25 06:00 PM</div>
+      </div>
+      <div class="event" role="listitem">
+        <div class="event-title">WE HAVE YOUR PACKAGE</div>
+        <div class="event-desc">Portfolio</div>
+      </div>
+      <div class="event" role="listitem">
+        <div class="event-title">ON THE WAY</div>
+        <div class="event-desc">Portfolio</div>
+      </div>
+      <div class="event active-background" role="listitem" aria-current="step">
+        <div class="event-title">OUT FOR DELIVERY</div>
+        <div style="height: 25px;"></div>
+      </div>
+      <div class="event" role="listitem" style="margin-top: 20px;">
+        <div class="event-to">
+          <div class="event-title to-small" style="margin-bottom:6px;">TO</div>
+          <p class="event-subtitle to-subtitle" style="margin:0;">Delivery Date</p>
+          <p class="event-desc to-desc" style="margin:0;">Estimated between</p>
+        </div>
+      </div>
+      <div class="event" role="listitem" style="margin-top: 10px;">
+        <a href="#" class="view-history" tabindex="0">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 5v14M19 12l-7 7-7-7"/>
+          </svg>
+          View travel history.
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="update-section">
+    Want updates on this shipment? Enter your email and we will do the rest!
+  </div>
+
+  <script>
+    function adjustProgressLine() {
+      const timelineLine = document.querySelector('.timeline-line');
+      const lineBg = document.querySelector('.line-bg');
+      const lineProgress = document.querySelector('.line-progress');
+      const bigCircle = document.querySelector('.big-circle');
+
+      if (!timelineLine || !lineProgress || !bigCircle) return;
+
+      const timelineHeight = timelineLine.offsetHeight;
+      const bigCircleCenter = bigCircle.offsetTop + bigCircle.offsetHeight / 2;
+      lineProgress.style.height = bigCircleCenter + 'px';
+      lineBg.style.height = timelineHeight + 'px';
+    }
+
+    window.addEventListener('load', adjustProgressLine);
+    window.addEventListener('resize', adjustProgressLine);
+  </script>
+</body>
+</html>
