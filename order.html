@@ -81,16 +81,24 @@
     background-color: #008000;
   }
   
+  .dot.incomplete {
+    background-color: #ccc;
+  }
+  
   .line {
     width: 25px;
     height: 2px;
     background-color: #008000;
   }
   
+  .line.incomplete {
+    background-color: #ccc;
+  }
+  
   .check {
     width: 16px;
     height: 16px;
-    background-color: #008000;
+    background-color: #ccc;
     border-radius: 50%;
     position: relative;
   }
@@ -497,16 +505,16 @@
   </div>
   
      <div class="content" role="main" aria-live="polite">
-    Hi. Your package was delivered on 05/08/2025<br />at 6:26pm.
+    Hi. Your package will be delivered on 05/12/2025<br />at 6:26pm.
      </div>
   <div class="progress-container">
     <div class="progress" aria-label="Delivery progress indicators" role="img">
       <div class="dot"></div>
       <div class="line"></div>
       <div class="dot"></div>
-      <div class="line"></div>
-      <div class="dot"></div>
-      <div class="line"></div>
+      <div class="line incomplete"></div>
+      <div class="dot incomplete"></div>
+      <div class="line incomplete"></div>
       <div class="check"></div>
     </div>
     <div class="proof" aria-label="Link to obtain proof of delivery" role="button" tabindex="0">OBTAIN PROOF OF DELIVERY</div>
@@ -620,10 +628,10 @@
       alert('Proof of delivery functionality would open here.');
     });
     
-    // Make view history clickable
+    // Make view history clickable (removed the alert)
     document.querySelector('.view-history').addEventListener('click', function(e) {
       e.preventDefault();
-      alert('Travel history would display here.');
+      // Removed the alert for view history
     });
   </script>
 </body>
