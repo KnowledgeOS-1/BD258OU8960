@@ -512,9 +512,9 @@
       <div class="dot"></div>
       <div class="line"></div>
       <div class="dot"></div>
-      <div class="line incompletse"></div>
-      <div class="dot incomplete"></div>
-      <div class="line incomplete"></div>
+      <div class="line"></div>
+      <div class="dot"></div>
+      <div class="line"></div>
       <div class="check"></div>
     </div>
     <div class="proof" aria-label="Link to obtain proof of delivery" role="button" tabindex="0">OBTAIN PROOF OF DELIVERY</div>
@@ -541,57 +541,59 @@
     <div class="info-row"><span class="label">Amount of package:</span><span class="value">$950</span></div>
   </div>
 
-  <!-- Timeline Section -->
-  <div class="timeline-container" role="list">
-    <div class="timeline-line" aria-hidden="true">
-      <div class="line-bg"></div>
-      <div class="line-progress"></div>
-      <div class="dot-timeline completed"></div>
-      <div class="dot-timeline completed"></div>
-      <div class="dot-timeline completed"></div>
-      <div class="big-circle" aria-current="true" aria-label="Current Stage: Out for Delivery">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M5 12h14M13 6l6 6-6 6"/>
-        </svg>
-      </div>
-      <div class="dot-timeline"></div>
-    </div>
-
-    <div class="timeline-content">
-      <div class="event" role="listitem">
-        <div class="event-title" style="font-weight:600;">FROM</div>
-        <div class="event-subtitle">Hamilton</div>
-        <div class="event-desc">04/12/25 06:00 PM</div>
-      </div>
-      <div class="event" role="listitem">
-        <div class="event-title">WE HAVE YOUR PACKAGE</div>
-        <div class="event-desc">Portfolio</div>
-      </div>
-      <div class="event" role="listitem">
-        <div class="event-title">ON THE WAY</div>
-        <div class="event-desc">Portfolio</div>
-      </div>
-      <div class="event active-background" role="listitem" aria-current="step">
-        <div class="event-title">OUT FOR DELIVERY</div>
-        <div style="height: 20px;"></div>
-      </div>
-      <div class="event" role="listitem" style="margin-top: 15px;">
-        <div class="event-to">
-          <div class="event-title to-small" style="margin-bottom:5px;">TO</div>
-          <p class="event-subtitle to-subtitle" style="margin:0;">Delivery Date</p>
-          <p class="event-desc to-desc" style="margin:0;">Estimated between</p>
-        </div>
-      </div>
-      <div class="event" role="listitem" style="margin-top: 8px;">
-        <a href="#" class="view-history" tabindex="0" role="button">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d="M12 5v14M19 12l-7 7-7-7"/>
-          </svg>
-          View travel history.
-        </a>
-      </div>
+<!-- Timeline Section -->
+<div class="timeline-container" role="list">
+  <div class="timeline-line" aria-hidden="true">
+    <div class="line-bg"></div>
+    <div class="line-progress" style="height: 100%;"></div>
+    <div class="dot-timeline completed"></div>
+    <div class="dot-timeline completed"></div>
+    <div class="dot-timeline completed"></div>
+        <div class="dot-timeline completed"></div>
+            <div class="dot-timeline completed"></div>
+    <div class="dot-timeline completed"></div>
+    <div class="big-circle" aria-current="true" aria-label="Current Stage: Delivered">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </svg>
     </div>
   </div>
+
+  <div class="timeline-content">
+    <div class="event" role="listitem">
+      <div class="event-title" style="font-weight:600;">FROM</div>
+      <div class="event-subtitle">Hamilton</div>
+      <div class="event-desc">04/12/25 06:00 PM</div>
+    </div>
+    <div class="event" role="listitem">
+      <div class="event-title">WE HAVE YOUR PACKAGE</div>
+      <div class="event-desc">Portfolio</div>
+    </div>
+    <div class="event" role="listitem">
+      <div class="event-title">ON THE WAY</div>
+      <div class="event-desc">Portfolio</div>
+    </div>
+    <div class="event" role="listitem">
+      <div class="event-title">OUT FOR DELIVERY</div>
+      <div style="height: 20px;"></div>
+    </div>
+    <div class="event active-background" role="listitem" aria-current="step">
+      <div class="event-to">
+        <div class="event-title" style="margin-bottom:5px;color:#2f2f32; text-transform: uppercase;">DELIVERED</div>
+        <p class="event-subtitle" style="margin:0;color:#606060;">TO: 331 West Salem Street Apt 202</p>
+        <p class="event-desc" style="margin:0;color:#606060;">05/12/25 06:26 PM</p>
+      </div>
+    </div>
+    <div class="event" role="listitem" style="margin-top: 8px;">
+      <a href="#" class="view-history" tabindex="0" role="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 5v14M19 12l-7 7-7-7"/>
+        </svg>
+        View travel history.
+      </a>
+    </div>
+  </div>
+</div>
 
   <div class="update-section">
     Want updates on this shipment? Enter your email and we will do the rest!
